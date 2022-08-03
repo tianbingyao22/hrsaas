@@ -15,6 +15,9 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+// 引入自定义指令文件,全部引入，并重命名为directives
+import * as directives from '@/directives'
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -35,9 +38,14 @@ Vue.use(ElementUI, { locale })
 
 Vue.config.productionTip = false
 
+// 图片的自定义指令
+for (const key in directives) {
+  Vue.directive(key, directives[key])
+}
+
 new Vue({
   el: '#app',
   router,
   store,
-  render: h => h(App)
+  render: (h) => h(App)
 })

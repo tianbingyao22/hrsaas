@@ -14,7 +14,9 @@
                 >添加部门</el-dropdown-item
               >
               <template v-if="!isRoot">
-                <el-dropdown-item>编辑部门</el-dropdown-item>
+                <el-dropdown-item @click.native="$emit('edit', TreeNode)"
+                  >编辑部门</el-dropdown-item
+                >
                 <!-- 组件不支持原生事件，要用原生事件可以用.native 修饰符-->
                 <el-dropdown-item @click.native="onRemove"
                   >删除部门</el-dropdown-item

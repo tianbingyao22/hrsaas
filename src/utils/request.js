@@ -15,6 +15,7 @@ const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   timeout: 5000
 }) // 创建一个axios的实例
+// 请求拦截器
 service.interceptors.request.use(async (config) => {
   // 如果存在token,则请求头携带token
   // if (store.state.user.token) {
@@ -32,7 +33,8 @@ service.interceptors.request.use(async (config) => {
     config.headers.Authorization = 'Bearer ' + store.state.user.token
   }
   return config
-}) // 请求拦截器
+})
+// 响应拦截器
 service.interceptors.response.use(
   (res) => {
     // 请求成功函数

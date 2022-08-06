@@ -45,7 +45,6 @@ export default {
   // 如果想要在data中使用本地图片，需要先引入图片
   data() {
     return {
-      // defaultImg: 'http://liufusong.top/logo.jpeg'
       defaultImg
     }
   },

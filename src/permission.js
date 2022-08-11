@@ -5,14 +5,15 @@ import router from '@/router'
 import store from '@/store'
 
 const writeList = ['/login', '404']
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const token = store.state.user.token
   // 是否登录
   if (token) {
     // 登陆的话获取用户信息
     // 为了避免重复获取用户信息,当用户信息不存在时才获取用户信息
     if (!store.state.user.userInfo.userId) {
-      store.dispatch('user/getUserInfo')
+      // 异步任务dispatch返回值是promise
+      await store.dispatch('user/getUserInfo')
     }
 
     // 登录：登陆的是否是login页面

@@ -158,6 +158,7 @@ export default {
     async onSave() {
       // 校验表单
       await this.$refs.form.validate()
+      console.log(111)
       try {
         if (this.formData.id) {
           await editDeptByIdApi(this.formData)

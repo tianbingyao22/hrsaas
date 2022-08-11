@@ -18,6 +18,12 @@ import '@/permission' // permission control
 // 引入自定义指令文件,全部引入，并重命名为directives
 import * as directives from '@/directives'
 
+// 引入封装的全局组件
+// import PageTools from '@/components/PageTools'
+// Vue.component('PageTools', PageTools)
+import component from '@/components'
+Vue.use(component)
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

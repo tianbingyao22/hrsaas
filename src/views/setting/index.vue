@@ -11,10 +11,12 @@
             <el-table-column prop="name" label="角色"> </el-table-column>
             <el-table-column prop="description" label="描述"> </el-table-column>
             <el-table-column label="操作">
-              <template>
+              <template slot-scope="{ row }">
                 <el-button type="success" size="small">分配权限</el-button>
                 <el-button type="primary" size="small">编辑</el-button>
-                <el-button type="danger" size="small">删除</el-button>
+                <el-button type="danger" size="small" @click="deleteRole(row)"
+                  >删除</el-button
+                >
               </template>
             </el-table-column>
           </el-table>
@@ -85,7 +87,7 @@
 </template>
 
 <script>
-import { getRolesApi, addRoleApi } from '@/api/roles'
+import { getRolesApi, addRoleApi, deleteRoleApi } from '@/api/roles'
 import { getCompanyInfoApi } from '@/api/company'
 export default {
   data() {
@@ -135,6 +137,11 @@ export default {
       await addRoleApi(this.addRoleForm)
       this.$message.success('添加角色成功')
       this.addDialogVisible = false
+      this.getRoles()
+    },
+    async deleteRole(row) {
+      await deleteRoleApi(row.id)
+      this.getRoles()
     },
     // 监听dialog关闭时的方法
     addDialogClose() {

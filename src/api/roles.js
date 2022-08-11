@@ -23,3 +23,15 @@ export function addRoleApi(data) {
     data
   })
 }
+
+/**
+ * 根据角色id删除角色
+ * @param {String} id //角色Id
+ * @returns
+ */
+export function deleteRoleApi(id) {
+  return request({
+    url: `/sys/role/${id}`,
+    method: 'DELETE'
+  })
+}

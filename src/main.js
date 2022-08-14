@@ -24,6 +24,16 @@ import * as directives from '@/directives'
 import component from '@/components'
 Vue.use(component)
 
+// 封装过滤器
+// 引入dayjs
+import * as filters from '@/filters'
+for (let key in filters) {
+  Vue.filter(key, filters[key])
+}
+// Vue.filter('formatTime', (val) => {
+//   return dayjs(val).format('YYYY-MM-DD')
+// })
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

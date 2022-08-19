@@ -24,6 +24,10 @@ import * as directives from '@/directives'
 import component from '@/components'
 Vue.use(component)
 
+// 打印的自定义指令
+import Print from 'vue-print-nb'
+Vue.use(Print)
+
 // 封装过滤器
 // 引入dayjs
 import * as filters from '@/filters'

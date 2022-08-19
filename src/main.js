@@ -18,6 +18,26 @@ import '@/permission' // permission control
 // 引入自定义指令文件,全部引入，并重命名为directives
 import * as directives from '@/directives'
 
+// 引入封装的全局组件
+// import PageTools from '@/components/PageTools'
+// Vue.component('PageTools', PageTools)
+import component from '@/components'
+Vue.use(component)
+
+// 打印的自定义指令
+import Print from 'vue-print-nb'
+Vue.use(Print)
+
+// 封装过滤器
+// 引入dayjs
+import * as filters from '@/filters'
+for (let key in filters) {
+  Vue.filter(key, filters[key])
+}
+// Vue.filter('formatTime', (val) => {
+//   return dayjs(val).format('YYYY-MM-DD')
+// })
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

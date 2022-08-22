@@ -1,7 +1,10 @@
 import Layout from '@/layout'
 export default {
-  path: '/permission',
+  path: '/permissions',
   component: Layout,
+  meta: {
+    id: 'permissions'
+  },
   children: [
     {
       path: '',

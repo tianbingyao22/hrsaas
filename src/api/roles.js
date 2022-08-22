@@ -35,3 +35,28 @@ export function deleteRoleApi(id) {
     method: 'DELETE'
   })
 }
+
+/**
+ * 根据角色id获取角色详情信息
+ * @param {String} id //角色id
+ * @returns
+ */
+export function getRolesInfo(id) {
+  return request({
+    url: '/sys/role/' + id
+  })
+}
+
+
+/**
+ *给角色分配权限
+ * @param {Object} data {id,permIds}
+ * @returns promise
+ */
+export function assignPerm(data) {
+  return request({
+    url: '/sys/role/assignPrem',
+    method: 'put',
+    data
+  })
+}

@@ -4,13 +4,25 @@
       <page-tools>
         <span slot="left-tag">共166条记录</span>
         <template slot="right">
-          <el-button size="small" type="warning" @click="importEmployee"
+          <el-button
+            size="small"
+            type="warning"
+            @click="importEmployee"
+            v-isHas="point.employees.import"
             >导入</el-button
           >
-          <el-button size="small" type="danger" @click="exportExcel"
+          <el-button
+            size="small"
+            type="danger"
+            @click="exportExcel"
+            v-if="isHas(point.employees.export)"
             >导出</el-button
           >
-          <el-button size="small" type="primary" @click="addShow"
+          <el-button
+            size="small"
+            type="primary"
+            @click="addShow"
+            v-if="isHas(point.employees.add)"
             >新增员工</el-button
           >
         </template>
@@ -69,8 +81,17 @@
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
-              <el-button type="text" size="small">角色</el-button>
-              <el-button type="text" size="small" @click="onRemove(row.id)"
+              <el-button
+                type="text"
+                size="small"
+                @click="showAssignDialog(row.id)"
+                >角色</el-button
+              >
+              <el-button
+                type="text"
+                size="small"
+                @click="onRemove(row.id)"
+                v-if="isHas(point.employees.del)"
                 >删除</el-button
               >
             </template>
@@ -100,6 +121,12 @@
     <el-dialog title="头像二维码" :visible.sync="erCodeDialog">
       <canvas id="canvas"></canvas>
     </el-dialog>
+
+    <!-- 角色分配 -->
+    <AssignRole
+      :visible.sync="showAssignRole"
+      :employeesId="currentEmployeesId"
+    ></AssignRole>
   </div>
 </template>
 
@@ -107,6 +134,8 @@
 import { getEmployeesListApi, delEmployee } from '@/api/employees'
 import employees from '@/constant/employees'
 import AddEmployees from './components/add-employees.vue'
+import AssignRole from './components/assign-role.vue'
+import permissionPoint from '@/constant/permission'
 const { exportExcelMapPath, hireType } = employees
 import QRcode from 'qrcode'
 export default {
@@ -117,11 +146,15 @@ export default {
       employees: [],
       total: 0,
       showAddEmployees: false,
-      erCodeDialog: false
+      erCodeDialog: false,
+      showAssignRole: false,
+      currentEmployeesId: '',
+      point: permissionPoint
     }
   },
   components: {
-    AddEmployees
+    AddEmployees,
+    AssignRole
   },
   created() {
     this.getEmployeesList()
@@ -188,6 +221,15 @@ export default {
         const canvas = document.getElementById('canvas')
         QRcode.toCanvas(canvas, val)
       })
+    },
+    // 显示角色分配
+    showAssignDialog(id) {
+      this.currentEmployeesId = id
+      this.showAssignRole = true
+    },
+    // 判断是否存在该按钮权限
+    isHas(point) {
+      return this.$store.state.permission.points.includes(point)
     }
   }
 }

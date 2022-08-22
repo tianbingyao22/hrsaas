@@ -1,3 +1,4 @@
+import store from '@/store'
 // 自定义指令配置
 
 export const imgError = {
@@ -19,6 +20,14 @@ export const imgError = {
       el.onerror = function () {
         el.src = value
       }
+    }
+  }
+}
+export const isHas = {
+  inserted(el, binding) {
+    const has = store.state.permission.points.includes(binding.value)
+    if (!has) {
+      el.remove()
     }
   }
 }

@@ -3,7 +3,10 @@
     <div class="app-container">
       <el-tabs v-model="activeName">
         <el-tab-pane label="角色管理" name="first">
-          <el-button type="primary" @click="addDialogVisible = true"
+          <el-button
+            type="primary"
+            @click="addDialogVisible = true"
+            v-if="isHas(point.roles.add)"
             >新增角色</el-button
           >
           <el-table :data="tableData" style="width: 100%">
@@ -12,7 +15,12 @@
             <el-table-column prop="description" label="描述"> </el-table-column>
             <el-table-column label="操作">
               <template slot-scope="{ row }">
-                <el-button type="success" size="small">分配权限</el-button>
+                <el-button
+                  type="success"
+                  size="small"
+                  @click="showRightsDialog(row.id)"
+                  >分配权限</el-button
+                >
                 <el-button type="primary" size="small">编辑</el-button>
                 <el-button type="danger" size="small" @click="deleteRole(row)"
                   >删除</el-button
@@ -83,12 +91,44 @@
         <el-button type="primary" @click="AddRole">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配权限对话框 -->
+    <el-dialog
+      title="给角色分配权限"
+      :visible.sync="setRightsDialog"
+      width="50%"
+      @close="setRightsClose"
+      destroy-on-close
+    >
+      <el-tree
+        show-checkbox
+        default-expand-all
+        node-key="id"
+        :data="permission"
+        :default-checked-keys="defaultCheckedKeys"
+        :props="{ label: 'name' }"
+        ref="perTree"
+      ></el-tree>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRightsDialog = false">取 消</el-button>
+        <el-button type="primary" @click="onSaveRights">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRolesApi, addRoleApi, deleteRoleApi } from '@/api/roles'
+import {
+  getRolesApi,
+  addRoleApi,
+  deleteRoleApi,
+  getRolesInfo,
+  assignPerm
+} from '@/api/roles'
 import { getCompanyInfoApi } from '@/api/company'
+import { getPermissionList } from '@/api/permission'
+import { transListToTree } from '@/utils'
+import mixInsPermissionPoint from '@/minins/permission'
+// import permissionPoint from '@/constant/permission'
 export default {
   data() {
     return {
@@ -105,12 +145,19 @@ export default {
       addRoleFormRules: {
         name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }]
       },
-      companyInfo: {}
+      companyInfo: {},
+      setRightsDialog: false,
+      permission: [],
+      defaultCheckedKeys: [],
+      roleId: ''
+      // point: permissionPoint
     }
   },
+  mixins: [mixInsPermissionPoint],
   created() {
     this.getRoles()
     this.getCompanyInfo()
+    this.getPermissions()
   },
   methods: {
     async getRoles() {
@@ -154,7 +201,38 @@ export default {
         this.$store.state.user.userInfo.companyId
       )
       this.companyInfo = res
+    },
+    // 显示分配权限对话框
+    async showRightsDialog(id) {
+      this.roleId = id
+      this.setRightsDialog = true
+      const { permIds } = await getRolesInfo(id)
+      this.defaultCheckedKeys = permIds
+    },
+    // 获取权限列表
+    async getPermissions() {
+      const res = await getPermissionList()
+      const treePermission = transListToTree(res, '0')
+      this.permission = treePermission
+    },
+    // 关闭树形权限列表弹窗
+    setRightsClose() {
+      this.defaultCheckedKeys = []
+      // 由于默认选中只有第一次生效，因此要结合v-if在关闭弹窗时销毁树形才可以生效重置数据，或者运用dialog组件中关闭时销毁组件数据的属性
+    },
+    // 点击确定保存权限
+    async onSaveRights() {
+      await assignPerm({
+        id: this.roleId,
+        permIds: this.$refs.perTree.getCheckedKeys()
+      })
+      this.$message.success('分配成功')
+      this.setRightsDialog = false
     }
+    // // 按钮权限
+    // isHas(point) {
+    //   return this.$store.state.permission.points.includes(point)
+    // }
   }
 }
 </script>

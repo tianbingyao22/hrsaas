@@ -34,7 +34,8 @@ export default {
   computed: {
     ...mapGetters(['sidebar']),
     routes() {
-      // 由于通过该方法只能获取到静态路由，不能获取到动态路由，因此侧边栏菜单渲染不出来，因此我们要自己维护一个路由规则
+      // 可以获取到所有路由规则(动态添加的)
+      //  我们自己去维护一个路由规则(所有路由)
       return this.$store.state.permission.routes
     },
     activeMenu() {
@@ -54,7 +55,7 @@ export default {
     },
     isCollapse() {
       return !this.sidebar.opened
-    }
-  }
+    },
+  },
 }
 </script>

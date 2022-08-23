@@ -14,15 +14,15 @@ export default {
   props: {
     collapse: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       title: 'Vue Admin Template',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png',
     }
-  }
+  },
 }
 </script>
 
@@ -50,7 +50,7 @@ export default {
     width: 100%;
 
     // 大图样式
-    & .sidebar-logo {
+    .sidebar-logo {
       width: 140px;
       vertical-align: middle;
       margin-right: 12px;

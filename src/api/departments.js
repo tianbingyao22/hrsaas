@@ -1,60 +1,64 @@
 import request from '@/utils/request'
 
 /**
- * 获取部门列表
+ * 获取组织架构的数据
  * @returns promise
  */
 export function getDeptsApi() {
   return request({
-    url: '/company/department'
+    url: '/company/department',
   })
 }
 
 /**
- * 根据部门id删除部门
- * @param {String} id  //部门id
+ * 删除部门
+ * @param {*} id 要删除的部门id
  * @returns promise
  */
-export function delDepts(id) {
+export function delDeptsApi(id) {
   return request({
-    url: `/company/department/${id}`,
-    method: 'DELETE'
+    url: '/company/department/' + id,
+    method: 'DELETE',
   })
 }
 
 /**
  * 新增部门
- * @param {Object} data //新增部门要的表单信息
- * @returns
+ * @param {Object} data
+ * code 部门编码，同级部门不可重复
+ * introduce 介绍
+ * manager 负责人名称
+ * name	部门名称
+ * pid	父级部门ID
+ * @returns promise
  */
-export function addDeptsApi(data) {
+export function addDeptApi(data) {
   return request({
     url: '/company/department',
     method: 'POST',
-    data
+    data,
   })
 }
 
 /**
- *根据部门id获取部门详细信息
- * @param {String} id //部门id
- * @returns
+ * 根据id获取部门详情
+ * @param {String} id 部门id
+ * @returns Promise
  */
 export function getDeptByIdApi(id) {
   return request({
-    url: '/company/department/' + id
+    url: '/company/department/' + id,
   })
 }
 
 /**
- * 根据id修改部门信息
- * @param {Object} data
- * @returns
+ * 根据id修改部门详情
+ * @returns Promise
  */
-export function editDeptByIdApi(data) {
+export function editDeptsApi(data) {
   return request({
-    url: `/company/department/${data.id}`,
+    url: '/company/department/' + data.id,
     method: 'PUT',
-    data
+    data,
   })
 }

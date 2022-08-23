@@ -6,12 +6,17 @@
       @toggleClick="toggleSideBar"
     />
 
+    <!-- <breadcrumb class="breadcrumb-container" /> -->
     <div class="app-breadcrumb">
       {{ $store.state.user.userInfo.companyName }}
       <span class="breadBtn">体验版</span>
     </div>
 
     <div class="right-menu">
+      <!-- 中英文组件 -->
+      <ToggleLang></ToggleLang>
+      <!-- 全屏组件 -->
+      <FullScreen></FullScreen>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img
@@ -42,7 +47,7 @@ import Hamburger from '@/components/Hamburger'
 import defaultImg from '@/assets/common/head.jpg'
 
 export default {
-  // 如果想要在data中使用本地图片，需要先引入图片
+  // 如果想在data中定义本地图片路径,需要先引入
   data() {
     return {
       defaultImg
@@ -75,20 +80,6 @@ export default {
   background-image: -webkit-linear-gradient(left, #3d6df8, #5b8cff);
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background 0.3s;
-    -webkit-tap-highlight-color: transparent;
-    color: #fff;
-    fill: currentcolor;
-    &:hover {
-      background: rgba(0, 0, 0, 0.025);
-    }
-  }
-
   .app-breadcrumb {
     display: inline-block;
     font-size: 18px;
@@ -108,11 +99,30 @@ export default {
     }
   }
 
+  .hamburger-container {
+    line-height: 46px;
+    height: 100%;
+    float: left;
+    cursor: pointer;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    color: #fff;
+    fill: currentColor;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+  }
+
+  .breadcrumb-container {
+    float: left;
+  }
+
   .right-menu {
     float: right;
     height: 100%;
     line-height: 50px;
-
+    display: flex;
     &:focus {
       outline: none;
     }
@@ -146,8 +156,9 @@ export default {
         cursor: pointer;
 
         span {
-          margin-left: 5px;
+          margin: 0 3px;
         }
+
         .user-avatar {
           cursor: pointer;
           width: 40px;

@@ -1,31 +1,36 @@
 <template>
   <div class="dashboard-container">
     <div class="app-container">
-      <el-card class="box-card">
-        <el-button size="small" type="primary" @click="showAddDialog('0', 1)"
-          >添加权限</el-button
-        >
-      </el-card>
+      <page-tools :isShowLeft="false">
+        <template slot="right">
+          <el-button @click="showAddDialog('0', 1)">添加权限</el-button>
+        </template>
+      </page-tools>
+
       <el-table
-        :data="permissions"
-        border
-        style="width: 100%"
-        row-key="id"
         ref="table"
+        row-key="id"
+        :data="permissions"
+        style="width: 100%"
       >
-        <el-table-column label="名称">
+        <el-table-column label="名称" width="180">
           <template v-slot="{ row }">
             <i
               v-if="row.children"
-              class="el-icon-folder-opened"
               style="margin-right: 5px"
+              class="el-icon-folder-opened"
               @click="expend(row)"
             ></i>
-            <i class="el-icon-folder" v-if="row.type === 2"></i>
+            <!-- <i
+              v-if="row.type === 2"
+              class="el-icon-folder"
+              style="margin-right: 5px"
+            ></i> -->
             <span>{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="code" label="标识"> </el-table-column>
+        <el-table-column prop="code" label="标识" width="180">
+        </el-table-column>
         <el-table-column prop="description" label="描述"> </el-table-column>
         <el-table-column label="操作">
           <template v-slot="{ row }">
@@ -38,6 +43,7 @@
         </el-table-column>
       </el-table>
     </div>
+
     <!-- 放置一个弹层 用来编辑新增节点 -->
     <el-dialog title="添加权限点" :visible.sync="showDialog">
       <!-- 表单 -->
@@ -64,7 +70,7 @@
           <el-button size="small" type="primary" @click="onSave"
             >确定</el-button
           >
-          <el-button size="small" @click="showDialog = false">取消</el-button>
+          <el-button size="small">取消</el-button>
         </el-col>
       </el-row>
     </el-dialog>
@@ -84,15 +90,17 @@ export default {
         description: '', // 描述
         type: '', // 类型 该类型 不需要显示 因为点击添加的时候已经知道类型了
         pid: '', // 因为做的是树 需要知道添加到哪个节点下了
-        enVisible: '0' // 开启
+        enVisible: '0', // 开启
       },
       rules: {
         name: [
-          { required: true, message: '权限名称不能为空', trigger: 'blur' }
+          { required: true, message: '权限名称不能为空', trigger: 'blur' },
         ],
-        code: [{ required: true, message: '权限标识不能为空', trigger: 'blur' }]
+        code: [
+          { required: true, message: '权限标识不能为空', trigger: 'blur' },
+        ],
       },
-      showDialog: false
+      showDialog: false,
     }
   },
 
@@ -105,34 +113,30 @@ export default {
       const res = await getPermissionList()
       this.permissions = transListToTree(res, '0')
     },
-    // 点击展开图标
     expend(row) {
-      row.isExpend = !row.isExpend
-      this.$refs.table.toggleRowExpansion(row, row.isExpend)
+      // console.log('点击展开', row)
+      row.isExpand = !row.isExpand
+      this.$refs.table.toggleRowExpansion(row, row.isExpand)
     },
-    // 点击显示添加权限点的弹层
     showAddDialog(id, type) {
       this.showDialog = true
       this.formData.pid = id
       this.formData.type = type
     },
-    // 点击确定保存添加的权限点
     onSave() {
       this.$refs.form.validate(async (valid) => {
         if (!valid) return
         await addPermission(this.formData)
+        this.$message.success('添加成功')
         this.showDialog = false
         this.getPermissions()
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped lang="scss">
-::v-deep .el-card__body {
-  text-align: right;
-}
 ::v-deep .el-table [class*='el-table__row--level'] .el-table__expand-icon {
   display: none;
 }

@@ -7,22 +7,18 @@
           <el-button
             size="small"
             type="warning"
-            @click="importEmployee"
+            @click="$router.push('/import')"
             v-isHas="point.employees.import"
             >导入</el-button
           >
-          <el-button
-            size="small"
-            type="danger"
-            @click="exportExcel"
-            v-if="isHas(point.employees.export)"
+          <el-button size="small" type="danger" @click="exportExcel"
             >导出</el-button
           >
           <el-button
+            v-if="isHas(point.employees)"
             size="small"
             type="primary"
-            @click="addShow"
-            v-if="isHas(point.employees.add)"
+            @click="showAdd"
             >新增员工</el-button
           >
         </template>
@@ -37,7 +33,6 @@
               <img
                 v-imgError="require('@/assets/common/head.jpg')"
                 :src="row.staffPhoto"
-                alt=""
                 style="
                   border-radius: 50%;
                   width: 100px;
@@ -52,22 +47,25 @@
           <el-table-column
             label="聘用形式"
             sortable=""
-            :formatter="gormatFormOfEmployment"
+            :formatter="formatFormOfEmployment"
             prop="formOfEmployment"
-          />
+          >
+          </el-table-column>
           <el-table-column label="部门" sortable="" prop="departmentName" />
           <el-table-column label="入职时间" sortable="">
+            <!-- 为什么这个位置用过滤器,格式化时间不只局限于表格 此时建议使用过滤器 -->
             <template slot-scope="{ row }">
               {{ row.timeOfEntry | formatTime }}
             </template>
           </el-table-column>
-          <el-table-column label="账户状态" sortable="" prop="enableState">
+          <el-table-column label="账户状态" sortable="">
             <template slot-scope="{ row }">
               <el-switch
                 :value="row.enableState === 1"
                 active-color="#13ce66"
-                inactive-color="#ccc"
-              ></el-switch>
+                inactive-color="#ff4949"
+              >
+              </el-switch>
             </template>
           </el-table-column>
           <el-table-column label="操作" sortable="" fixed="right" width="280">
@@ -88,6 +86,13 @@
                 >角色</el-button
               >
               <el-button
+                v-if="isHas(point.employees.add)"
+                size="small"
+                type="primary"
+                @click="showAdd"
+                >新增员工</el-button
+              >
+              <el-button
                 type="text"
                 size="small"
                 @click="onRemove(row.id)"
@@ -105,64 +110,72 @@
           style="height: 60px"
         >
           <el-pagination
-            :total="total"
             :page-size="pages.size"
-            layout="prev, pager, next"
+            :total="total"
             @current-change="currentChange"
+            layout="prev, pager, next"
           />
         </el-row>
       </el-card>
     </div>
-    <AddEmployees
-      :visible.sync="showAddEmployees"
+
+    <!-- 添加员工组件 -->
+    <add-employees
       @add-success="getEmployeesList"
-    ></AddEmployees>
-    <!-- 头像二维码对话框 -->
-    <el-dialog title="头像二维码" :visible.sync="erCodeDialog">
+      :visible.sync="showAddEmployees"
+    />
+
+    <!-- 头像二维码 -->
+    <el-dialog title="头像二维码" :visible.sync="ercodeDialog">
       <canvas id="canvas"></canvas>
     </el-dialog>
 
-    <!-- 角色分配 -->
-    <AssignRole
-      :visible.sync="showAssignRole"
+    <!-- 分配角色 -->
+    <assign-role
       :employeesId="currentEmployeesId"
-    ></AssignRole>
+      :visible.sync="showAssignRole"
+    />
   </div>
 </template>
 
 <script>
-import { getEmployeesListApi, delEmployee } from '@/api/employees'
+import { getEmployeesInfoApi, delEmployee } from '@/api/employees'
 import employees from '@/constant/employees'
 import AddEmployees from './components/add-employees.vue'
 import AssignRole from './components/assign-role.vue'
-import permissionPoint from '@/constant/permission'
-const { exportExcelMapPath, hireType } = employees
 import QRcode from 'qrcode'
+import MixinPermission from '@/mixins/permission'
+const { exportExcelMapPath, hireType } = employees
 export default {
   name: 'Employees',
+  mixins: [MixinPermission],
   data() {
     return {
-      pages: { page: 1, size: 10 },
       employees: [],
       total: 0,
+      pages: {
+        page: 1,
+        size: 5,
+      },
       showAddEmployees: false,
-      erCodeDialog: false,
+      ercodeDialog: false,
       showAssignRole: false,
       currentEmployeesId: '',
-      point: permissionPoint
     }
   },
-  components: {
-    AddEmployees,
-    AssignRole
-  },
+
   created() {
     this.getEmployeesList()
   },
 
+  components: {
+    AddEmployees,
+    AssignRole,
+  },
+
   methods: {
     async getEmployeesList() {
-      const { rows, total } = await getEmployeesListApi(this.pages)
+      const { rows, total } = await getEmployeesInfoApi(this.pages)
       this.employees = rows
       this.total = total
     },
@@ -170,68 +183,66 @@ export default {
       this.pages.page = val
       this.getEmployeesList()
     },
-    gormatFormOfEmployment(row, column, cellValue, index) {
+    formatFormOfEmployment(row, column, cellValue, index) {
       const findItem = employees.hireType.find((item) => item.id === cellValue)
       return findItem ? findItem.value : '未知'
-      // if (cellValue === 1) return '正式'
-      // if (cellValue === 2) return '非正式'
-      // return '未知'
     },
     async onRemove(id) {
-      await this.$confirm('确定要删除？')
-      await delEmployee(id) //删除
-      this.$message.success('删除员工成功')
+      await this.$confirm('是否删除该员工?')
+      await delEmployee(id)
+      this.$message.success('删除成功')
+      this.getEmployeesList()
     },
-    addShow() {
+    showAdd() {
       this.showAddEmployees = true
     },
-    importEmployee() {
-      this.$router.push('/import')
-    },
     async exportExcel() {
-      const { rows } = await getEmployeesListApi({ page: 1, size: this.total })
+      const { export_json_to_excel } = await import('@/vendor/Export2Excel')
+      const { rows } = await getEmployeesInfoApi({
+        page: 1,
+        size: this.total,
+      })
+      // 表头数据 ['手机号', '姓名',...]
       const header = Object.keys(exportExcelMapPath)
+      // data数据
       const data = rows.map((item) => {
         return header.map((h) => {
           if (h === '聘用形式') {
-            const hireItem = hireType.find(
-              (hire) => hire.id === item[exportExcelMapPath[h]]
-            )
-            return hireItem ? hireItem.value : '未知'
+            const findItem = hireType.find((hire) => {
+              return hire.id === item[exportExcelMapPath[h]]
+            })
+            return findItem ? findItem.value : '未知'
           } else {
             return item[exportExcelMapPath[h]]
           }
         })
       })
-      const { export_json_to_excel } = await import('@/vendor/export2excel')
       export_json_to_excel({
-        header,
+        header, //表头 必填
         data, //具体数据 必填
         filename: '员工列表', //非必填
         autoWidth: true, //非必填
-        bookType: 'xlsx' //非必填
+        bookType: 'xlsx', //非必填
+        multiHeader: [['手机号', '其他信息', '', '', '', '', '部门']],
+        merges: ['A1:A2', 'B1:F1', 'G1:G2'],
       })
     },
-    // 显示头像二维码
-    showErCodeDialog(val) {
-      if (!val) return this.$message.error('该用户还没有设置头像')
-      this.erCodeDialog = true
-      // 视图更新异步任务，canvas还没挂在上去，获取不到
+    // 点击显示二维码弹层
+    showErCodeDialog(staffPhoto) {
+      if (!staffPhoto) return this.$message.error('该用户还未设置头像')
+      this.ercodeDialog = true
+
       this.$nextTick(() => {
         const canvas = document.getElementById('canvas')
-        QRcode.toCanvas(canvas, val)
+        QRcode.toCanvas(canvas, staffPhoto)
       })
     },
-    // 显示角色分配
+    // 点击角色显示分配角色弹层
     showAssignDialog(id) {
-      this.currentEmployeesId = id
       this.showAssignRole = true
+      this.currentEmployeesId = id
     },
-    // 判断是否存在该按钮权限
-    isHas(point) {
-      return this.$store.state.permission.points.includes(point)
-    }
-  }
+  },
 }
 </script>
 
